@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+    <title>SpringBoot API REST</title>
+    
+    <style type="text/css">
+    html { margin-left:5%;
+    margin-right:5%;
+    margin-top:5%;
+    }
+    </style>
+  </head>
+  <body>
+   <form id="form">
+    <h1>SpringBoot API REST - Estudos</h1>
+     <div class="mb-3">
+    <label for="id" class="form-label">Id</label>
+    <input type="text" class="form-control" id="id" readonly="readonly">
+  </div>
+    <div class="mb-3">
+    <label for="nome" class="form-label">Nome</label>
+    <input type="text" class="form-control" id="nome" placeholder="Informe o nome do usuário">
+  </div>
+     <div class="mb-3">
+    <label for="idade" class="form-label">Idade</label>
+    <input type="text" class="form-control" id="idade" placeholder="Informe a idade do usuário" >
+  </div>
+  
+    </form>
+    
+    <button type="button" class="btn btn-primary" onclick="salvarUsuario()">Salvar</button>
+    <button type="button" class="btn btn-secondary" onclick="document.getElementById('form').reset();">Novo</button>
+    <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalPesquisaUser">Pesquisar</button>
+    <button type="button" class="btn btn-danger" onclick="botaoDeletarTela();">Deletar</button>
+    
+    
+    
+    
+    
+    <div class="modal fade" id="modalPesquisaUser" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Pesquisa de Usuario</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="mb-3">
+            <label for="nameBusca" class="col-form-label">Informe o nome:</label>
+            <input type="text" class="form-control" id="nameBusca">
+          </div>
+      <button type="button" class="btn btn-success" onclick="pesquisaUser()">Buscar</button>
+        </form>
+        
+        <div style="overflow:scroll; height: 400px  ">
+        <table class="table table-striped" id="tabelaResultados">
+  <thead>
+    <tr>
+      <th scope="col">ID</th>
+      <th scope="col">Nome</th>
+      <th scope="col">Editar</th>
+       <th scope="col">Deletar</th>
+      
+    </tr>
+  </thead>
+  <tbody>
+  
+  </tbody>
+</table>
+</div>
+
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+      </div>
+    </div>
+  </div>
+</div>
+    
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+ 
+ 
+ <script type="text/javascript">
+ 
+ function pesquisaUser(){
+	 var nome = $('#nameBusca').val();                 //nameBusca = id do Informe o nome
+	 if(nome != null && nome.trim() != ''){
+		 
+		 $.ajax({
+				method: "GET",
+				url:"buscarPorNome",
+				data: "name="+ nome, 	  //name ( parametro no controller) nome ( oq ta vindo da tela no javascript)  
+				contentType: "application/json; charset=utf-8",
+				success: function(response){
+				$('tabelaResultados > tbody > tr').remove();
+				for(var i = 0; i<response.length; i++){
+					$('#tabelaResultados > tbody').append('<tr id="'+response[i].id+'"><td>'+response[i].id+'</td><td>'+response[i].nome+'</td><td><button type="button" class="btn btn-primary" onclick="colocarEmEdicao('+response[i].id+')">Ver</button></td><td><button type="button" class="btn btn-danger" onclick="deleteUser('+response[i].id+')">Delete</button></td></tr>');
+				}
+				} 
+			 }).fail(function(xhr, status, errorThrown){
+				 alert("Erro ao salvar usuário!" + xhr.responseText);
+			 });
+	 }
+ }
+ 
+ 
+ function botaoDeletarTela(){
+	 var id = $("#id").val();
+	 if(id !=null && id.trim() == ''){
+	 deleteUser(id);
+	 document.getElementById('form').reset();
+	 }
+	 
+ }
+ 
+ function deleteUser(id){
+	 
+	 if(confirm('Deseja realmente deletar?')){
+	 $.ajax({
+			method: "DELETE",
+			url:"delete",
+			data: "iduser=" + id, 	  
+			success: function(response){
+				$('#' + id).remove();
+			alert(response);
+			} 
+		 }).fail(function(xhr, status, errorThrown){
+			 alert("Erro ao salvar usuário por id!" + xhr.responseText);
+		 });
+	 }
+ }
+ 
+ function colocarEmEdicao(id){
+	 
+	 $.ajax({
+			method: "GET",
+			url:"buscaruserid",
+			data: "iduser="+ id, 	  //name ( parametro no controller) nome ( oq ta vindo da tela no javascript)  
+			contentType: "application/json; charset=utf-8",
+			success: function(response){
+			$("#id").val(response.id);
+			  $("#nome").val(response.nome);
+			  $("#idade").val(response.idade);
+			  $('#modalPesquisaUser').modal('hide');
+			
+			} 
+		 }).fail(function(xhr, status, errorThrown){
+			 alert("Erro ao salvar usuário por id!" + xhr.responseText);
+		 });
+	 
+ }
+ 
+ 
+ function salvarUsuario(){
+	 var id = $("#id").val();
+	 var nome = $("#nome").val();
+	 var idade = $("#idade").val();
+	 
+	 if(nome ==null || nome !=null  && nome.trim() ==''){
+		 $('#nome').focus();
+		 alert('Informe o nome!');
+		 return;
+	 }
+	 
+	 if(idade ==null || idade !=null  && idade.trim() ==''){
+		 $('#idade').focus();
+		 alert('Informe a idade!');
+		 return;
+	 }
+	 $.ajax({
+		method: "POST",
+		url:"salvar",
+		data: JSON.stringify({id : id, nome : nome, idade : idade}),
+		contentType: "application/json; charset=utf-8",
+		success: function(response){
+			$("#id").val(response.id);
+			alert("Gravou com sucesso!");
+		} 
+	 }).fail(function(xhr, status, errorThrown){
+		 alert("Erro ao salvar usuário!" + xhr.responseText);
+	 });
+	 
+ }
+ 
+ </script>
+  </body>
+</html>
